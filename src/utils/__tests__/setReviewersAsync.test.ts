@@ -1,6 +1,5 @@
 import {describe, it, expect, vi, Mock} from 'vitest'
 import type {Client} from '../../types'
-import github from '@actions/github'
 
 import {setReviewersAsync} from '../setReviewersAsync'
 

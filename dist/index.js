@@ -44,7 +44,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
-const github_1 = __importDefault(__nccwpck_require__(5438));
+const github = __importStar(__nccwpck_require__(5438));
 const getYamlConfigAsync_1 = __importDefault(__nccwpck_require__(2313));
 const parseConfig_1 = __importDefault(__nccwpck_require__(7459));
 const getContextPullRequestDetails_1 = __importDefault(__nccwpck_require__(6342));
@@ -54,7 +54,7 @@ function run() {
     var _a, _b, _c, _d, _e, _f;
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const client = github_1.default.getOctokit(core.getInput('repo-token', { required: true }));
+            const client = github.getOctokit(core.getInput('repo-token', { required: true }));
             const configFilePath = core.getInput('config-file', { required: true });
             const unassignIfLabelRemoved = core.getInput('unassign-if-label-removed', {
                 required: false
@@ -63,12 +63,12 @@ function run() {
             if (contextDetails == null) {
                 throw new Error('No context details');
             }
-            const yamlConfig = yield (0, getYamlConfigAsync_1.default)(client, (_b = (_a = github_1.default.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.base) === null || _b === void 0 ? void 0 : _b.sha, configFilePath);
+            const yamlConfig = yield (0, getYamlConfigAsync_1.default)(client, (_b = (_a = github.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.base) === null || _b === void 0 ? void 0 : _b.sha, configFilePath);
             if (yamlConfig == null) {
                 throw new Error('Failed to load config file');
             }
             const config = (0, parseConfig_1.default)(yamlConfig);
-            const contextPayload = github_1.default.context.payload;
+            const contextPayload = github.context.payload;
             const assignedResult = yield (0, assignReviewersAsync_1.assignReviewersAsync)({
                 client,
                 contextDetails,
@@ -194,13 +194,33 @@ exports.assignReviewersAsync = assignReviewersAsync;
 
 "use strict";
 
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const github_1 = __importDefault(__nccwpck_require__(5438));
+const github = __importStar(__nccwpck_require__(5438));
 function getContextPullRequestDetails() {
-    const pullRequest = github_1.default.context.payload.pull_request;
+    const pullRequest = github.context.payload.pull_request;
     if (typeof pullRequest === 'undefined') {
         return null;
     }
@@ -221,6 +241,29 @@ exports.default = getContextPullRequestDetails;
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -235,12 +278,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const js_yaml_1 = __importDefault(__nccwpck_require__(1917));
-const github_1 = __importDefault(__nccwpck_require__(5438));
+const github = __importStar(__nccwpck_require__(5438));
 function getFileContents(client, ref, contentPath) {
     return __awaiter(this, void 0, void 0, function* () {
         const result = yield client.rest.repos.getContent({
-            owner: github_1.default.context.repo.owner,
-            repo: github_1.default.context.repo.repo,
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo,
             path: contentPath,
             ref
         });
