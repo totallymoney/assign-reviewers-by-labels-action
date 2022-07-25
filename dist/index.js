@@ -1,7 +1,7 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 3109:
+/***/ 1270:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -51,7 +51,7 @@ const getContextPullRequestDetails_1 = __importDefault(__nccwpck_require__(6342)
 const assignReviewersAsync_1 = __nccwpck_require__(9388);
 const unassignReviewersAsync_1 = __nccwpck_require__(5310);
 function run() {
-    var _a, _b, _c, _d, _e;
+    var _a, _b, _c, _d, _e, _f;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const client = github_1.default.getOctokit(core.getInput('repo-token', { required: true }));
@@ -59,21 +59,21 @@ function run() {
             const unassignIfLabelRemoved = core.getInput('unassign-if-label-removed', {
                 required: false
             });
-            const configFile = yield (0, getYamlConfigAsync_1.default)(client, (_b = (_a = github_1.default.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.base) === null || _b === void 0 ? void 0 : _b.sha, configFilePath);
-            if (configFile == null) {
-                throw new Error('Failed to load config file');
-            }
-            const config = (0, parseConfig_1.default)(configFile);
             const contextDetails = (0, getContextPullRequestDetails_1.default)();
             if (contextDetails == null) {
                 throw new Error('No context details');
             }
+            const yamlConfig = yield (0, getYamlConfigAsync_1.default)(client, (_b = (_a = github_1.default.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.base) === null || _b === void 0 ? void 0 : _b.sha, configFilePath);
+            if (yamlConfig == null) {
+                throw new Error('Failed to load config file');
+            }
+            const config = (0, parseConfig_1.default)(yamlConfig);
             const contextPayload = github_1.default.context.payload;
             const assignedResult = yield (0, assignReviewersAsync_1.assignReviewersAsync)({
                 client,
                 contextDetails,
                 contextPayload,
-                labelReviewers: config.assign,
+                labelReviewers: config.assign
             });
             if (assignedResult.status === 'error') {
                 core.setFailed(assignedResult.message);
@@ -86,20 +86,28 @@ function run() {
                     client,
                     contextDetails: {
                         labels: contextDetails.labels,
-                        reviewers: [...new Set([...contextDetails.reviewers, ...((_d = (_c = assignedResult.data) === null || _c === void 0 ? void 0 : _c.reviewers) !== null && _d !== void 0 ? _d : [])])],
+                        reviewers: [
+                            ...new Set([
+                                ...contextDetails.reviewers,
+                                ...((_d = (_c = assignedResult.data) === null || _c === void 0 ? void 0 : _c.reviewers) !== null && _d !== void 0 ? _d : [])
+                            ])
+                        ]
                     },
                     contextPayload,
-                    labelReviewers: config.assign,
+                    labelReviewers: config.assign
                 });
                 if (unassignedResult.status === 'error') {
                     core.setFailed(unassignedResult.message);
                     return;
                 }
+                core.setOutput('unassigned_status', unassignedResult.status);
+                core.setOutput('unassigned_message', unassignedResult.message);
+                core.setOutput('unassigned_url', (_e = unassignedResult.data) === null || _e === void 0 ? void 0 : _e.url);
                 core.debug(`${unassignedResult.status} - ${unassignedResult.message}`);
             }
-            core.setOutput('status', assignedResult.status);
-            core.setOutput('message', assignedResult.message);
-            core.setOutput('url', (_e = assignedResult.data) === null || _e === void 0 ? void 0 : _e.url);
+            core.setOutput('assigned_status', assignedResult.status);
+            core.setOutput('assigned_message', assignedResult.message);
+            core.setOutput('assigned_url', (_f = assignedResult.data) === null || _f === void 0 ? void 0 : _f.url);
         }
         catch (error) {
             if (error instanceof Error) {
@@ -109,7 +117,6 @@ function run() {
     });
 }
 exports.run = run;
-run();
 
 
 /***/ }),
@@ -194,14 +201,14 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const github_1 = __importDefault(__nccwpck_require__(5438));
 function getContextPullRequestDetails() {
     const pullRequest = github_1.default.context.payload.pull_request;
-    if (pullRequest == undefined) {
+    if (typeof pullRequest === 'undefined') {
         return null;
     }
     const labels = pullRequest.labels;
     const reviewers = pullRequest.requested_reviewers;
     return {
-        labels: labels.map((label) => label.name),
-        reviewers: reviewers.map((reviewer) => reviewer.login),
+        labels: labels.map(label => label.name),
+        reviewers: reviewers.map(reviewer => reviewer.login)
     };
 }
 exports.default = getContextPullRequestDetails;
@@ -278,10 +285,13 @@ function parseConfig(config) {
     if (!config.hasOwnProperty('assign')) {
         throw new Error('Config must have a list of labels with reviewers');
     }
-    const invalidLabels = Object
-        .keys(config.assign)
-        .filter((label) => !Array.isArray(config.assign[label]))
-        .map((label) => label);
+    const assign = config.assign;
+    if (typeof assign === 'string' || Array.isArray(assign)) {
+        throw new Error('Assign must be an object with labels and reviewers');
+    }
+    const invalidLabels = Object.keys(assign)
+        .filter(label => !Array.isArray(assign[label]))
+        .map(label => label);
     if (invalidLabels.length > 0) {
         throw new Error(`${invalidLabels.join(' + ')} must have an array of reviewers`);
     }
@@ -313,7 +323,7 @@ function setReviewersAsync(options) {
         const payload = options.contextPayload;
         const pullRequest = payload.pull_request;
         const repository = payload.repository;
-        if (pullRequest == undefined || repository == undefined) {
+        if (typeof pullRequest === 'undefined' || typeof repository === 'undefined') {
             throw new Error('Cannot resolve action context');
         }
         if (options.reviewers.length === 0) {
@@ -330,17 +340,19 @@ function setReviewersAsync(options) {
         const result = options.action === 'assign'
             ? yield options.client.rest.pulls.requestReviewers({
                 owner: repoOwner,
-                repo: repo,
+                repo,
                 pull_number: pullNumber,
                 reviewers
             })
             : yield options.client.rest.pulls.removeRequestedReviewers({
                 owner: repoOwner,
-                repo: repo,
+                repo,
                 pull_number: pullNumber,
                 reviewers
             });
-        return result;
+        return {
+            url: result.url
+        };
     });
 }
 exports.setReviewersAsync = setReviewersAsync;
@@ -13528,13 +13540,19 @@ module.exports = require("zlib");
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
 /******/ 	
 /************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(3109);
-/******/ 	module.exports = __webpack_exports__;
-/******/ 	
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+(() => {
+"use strict";
+var exports = __webpack_exports__;
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const program_1 = __nccwpck_require__(1270);
+(0, program_1.run)();
+
+})();
+
+module.exports = __webpack_exports__;
 /******/ })()
 ;
 //# sourceMappingURL=index.js.map
