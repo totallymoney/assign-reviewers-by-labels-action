@@ -44,7 +44,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
-const github_1 = __importDefault(__nccwpck_require__(5438));
+const github = __importStar(__nccwpck_require__(5438));
 const getYamlConfigAsync_1 = __importDefault(__nccwpck_require__(2313));
 const parseConfig_1 = __importDefault(__nccwpck_require__(7459));
 const getContextPullRequestDetails_1 = __importDefault(__nccwpck_require__(6342));
@@ -54,7 +54,7 @@ function run() {
     var _a, _b, _c, _d, _e, _f;
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const client = github_1.default.getOctokit(core.getInput('repo-token', { required: true }));
+            const client = github.getOctokit(core.getInput('repo-token', { required: true }));
             const configFilePath = core.getInput('config-file', { required: true });
             const unassignIfLabelRemoved = core.getInput('unassign-if-label-removed', {
                 required: false
@@ -63,12 +63,12 @@ function run() {
             if (contextDetails == null) {
                 throw new Error('No context details');
             }
-            const yamlConfig = yield (0, getYamlConfigAsync_1.default)(client, (_b = (_a = github_1.default.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.base) === null || _b === void 0 ? void 0 : _b.sha, configFilePath);
+            const yamlConfig = yield (0, getYamlConfigAsync_1.default)(client, (_b = (_a = github.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.base) === null || _b === void 0 ? void 0 : _b.sha, configFilePath);
             if (yamlConfig == null) {
                 throw new Error('Failed to load config file');
             }
             const config = (0, parseConfig_1.default)(yamlConfig);
-            const contextPayload = github_1.default.context.payload;
+            const contextPayload = github.context.payload;
             const assignedResult = yield (0, assignReviewersAsync_1.assignReviewersAsync)({
                 client,
                 contextDetails,
