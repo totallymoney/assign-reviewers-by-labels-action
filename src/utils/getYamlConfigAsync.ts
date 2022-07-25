@@ -1,5 +1,5 @@
 import yaml from 'js-yaml'
-import github from '@actions/github'
+import * as github from '@actions/github'
 
 import type {Client} from '../types'
 
