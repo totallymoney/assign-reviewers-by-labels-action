@@ -5,6 +5,9 @@ branding:
   color: 'blue'
 author: 'ljbc1994'
 inputs:
+  repo-token:
+    description: 'Token for the repository. Can be passed in using {{ secrets.GITHUB_TOKEN }}'
+    required: true
   config-file:
     description: 'Path to the assign reviewers by label YAML configuration file'
     default: .github/assign_label_reviewers.yml
