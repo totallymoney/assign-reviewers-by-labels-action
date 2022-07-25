@@ -70,7 +70,7 @@ export async function unassignReviewersAsync({
   if (result == null) {
     return {
       status: 'info',
-      message: 'Failed to unassign reviewers'
+      message: 'No reviewers to unassign'
     }
   }
 

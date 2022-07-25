@@ -173,8 +173,8 @@ function assignReviewersAsync({ client, labelReviewers, contextDetails, contextP
         });
         if (result == null) {
             return {
-                status: 'error',
-                message: 'Failed to assign reviewers'
+                status: 'info',
+                message: 'No reviewers to assign'
             };
         }
         return {
@@ -462,7 +462,7 @@ function unassignReviewersAsync({ client, labelReviewers, contextDetails, contex
         if (result == null) {
             return {
                 status: 'info',
-                message: 'Failed to unassign reviewers'
+                message: 'No reviewers to unassign'
             };
         }
         return {
