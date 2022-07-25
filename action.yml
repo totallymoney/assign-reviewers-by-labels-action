@@ -1,11 +1,31 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Assign reviewers by label'
+description: 'Use labels to automatically assign reviewers to PRs'
+branding:
+  icon: 'tag'  
+  color: 'blue'
+author: 'ljbc1994'
 inputs:
-  milliseconds: # change this
-    required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+  config-file:
+    description: 'Path to the assign reviewers by label YAML configuration file'
+    default: .github/assign_label_reviewers.yml
+    required: false
+  unassign-if-label-removed:
+    description: 'Unassign reviewers when the reviewers label is removed'
+    default: 'true'
+    required: false
+outputs:
+  assigned_status:
+    description: 'Whether reviewers have been assigned or unassigned successfully'
+  assigned_message:
+    description: 'Additional details of the status'
+  assigned_url:
+    description: 'The PR url'
+  unassigned_status:
+    description: 'Whether reviewers have been assigned or unassigned successfully'
+  unassigned_message:
+    description: 'Additional details of the status'
+  unassigned_url:
+    description: 'The PR url'
 runs:
   using: 'node16'
   main: 'dist/index.js'
