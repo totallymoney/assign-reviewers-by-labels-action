@@ -1,4 +1,4 @@
 assign:
-  login: ['ljbc1994']
-  signup: ['ljbc1994']
-  dashboard: ['ljbc1994']
+  login: ['ljbc1994', 'GMWilkinson']
+  signup: ['ljbc1994', 'GMWilkinson']
+  dashboard: ['ljbc1994', 'GMWilkinson']
