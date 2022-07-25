@@ -36,6 +36,6 @@ jobs:
         id: assign-reviewers
         uses: ljbc1994/assign-reviewers-by-labels@v1
         with:
-          remove-when-no-label: 'true'
+          unassign-if-label-removed: 'true'
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
 ```

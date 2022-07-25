@@ -58,8 +58,8 @@ export async function assignReviewersAsync({
 
   if (result == null) {
     return {
-      status: 'error',
-      message: 'Failed to assign reviewers'
+      status: 'info',
+      message: 'No reviewers to assign'
     }
   }
 
