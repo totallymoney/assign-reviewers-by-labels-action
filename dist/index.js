@@ -51,7 +51,7 @@ const getContextPullRequestDetails_1 = __importDefault(__nccwpck_require__(6342)
 const assignReviewersAsync_1 = __nccwpck_require__(9388);
 const unassignReviewersAsync_1 = __nccwpck_require__(5310);
 function run() {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b, _c, _d;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const client = github.getOctokit(core.getInput('repo-token', { required: true }));
@@ -100,14 +100,16 @@ function run() {
                     core.setFailed(unassignedResult.message);
                     return;
                 }
-                core.setOutput('unassigned_status', unassignedResult.status);
-                core.setOutput('unassigned_message', unassignedResult.message);
-                core.setOutput('unassigned_url', (_e = unassignedResult.data) === null || _e === void 0 ? void 0 : _e.url);
+                setResultOutput('unassigned', unassignedResult);
                 core.debug(`${unassignedResult.status} - ${unassignedResult.message}`);
             }
-            core.setOutput('assigned_status', assignedResult.status);
-            core.setOutput('assigned_message', assignedResult.message);
-            core.setOutput('assigned_url', (_f = assignedResult.data) === null || _f === void 0 ? void 0 : _f.url);
+            else {
+                setResultOutput('unassigned', {
+                    status: 'info',
+                    message: 'Skip unassigning reviewers'
+                });
+            }
+            setResultOutput('assigned', assignedResult);
         }
         catch (error) {
             if (error instanceof Error) {
@@ -117,6 +119,13 @@ function run() {
     });
 }
 exports.run = run;
+function setResultOutput(assignType, result) {
+    var _a, _b;
+    core.setOutput(`${assignType}_status`, result.status);
+    core.setOutput(`${assignType}_message`, result.message);
+    core.setOutput(`${assignType}_url`, (_a = result.data) === null || _a === void 0 ? void 0 : _a.url);
+    core.setOutput(`${assignType}_reviewers`, (_b = result.data) === null || _b === void 0 ? void 0 : _b.reviewers);
+}
 
 
 /***/ }),

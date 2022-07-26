@@ -101,7 +101,7 @@ describe('assignReviewersAsync', () => {
     expect(spy).toHaveBeenCalledTimes(0)
   })
 
-  it('should return an error status if reviewers could not be assigned', async () => {
+  it('should return an info status if reviewers could not be assigned', async () => {
     const spy = vi
       .spyOn(setReviewersAsyncFn, 'setReviewersAsync')
       .mockImplementationOnce(() => Promise.resolve(null))
@@ -120,8 +120,8 @@ describe('assignReviewersAsync', () => {
     })
 
     expect(result).toEqual({
-      status: 'error',
-      message: 'Failed to assign reviewers'
+      status: 'info',
+      message: 'No reviewers to assign'
     })
 
     expect(spy).toHaveBeenCalledTimes(1)
