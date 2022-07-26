@@ -17,9 +17,9 @@ jobs:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
       - name: unassigned reviewers
         run: |
-          echo "reviewer assigned status: ${{ steps.reviewer.outputs.assigned_status }}"
-          echo "reviewer assigned message: ${{ steps.reviewer.outputs.assigned_message }}"
-          echo "reviewer assigned: ${{ steps.reviewer.outputs.assigned_reviewers }}"
-          echo "reviewer unassigned status: ${{ steps.reviewer.outputs.unassigned_status }}"
-          echo "reviewer unassigned message: ${{ steps.reviewer.outputs.unassigned_message }}"
-          echo "reviewer unassigned: ${{ steps.reviewer.outputs.unassigned_reviewers }}"
+          echo "reviewer assigned status: ${{ steps.main.outputs.assigned_status }}"
+          echo "reviewer assigned message: ${{ steps.main.outputs.assigned_message }}"
+          echo "reviewer assigned: ${{ steps.main.outputs.assigned_reviewers }}"
+          echo "reviewer unassigned status: ${{ steps.main.outputs.unassigned_status }}"
+          echo "reviewer unassigned message: ${{ steps.main.outputs.unassigned_message }}"
+          echo "reviewer unassigned: ${{ steps.main.outputs.unassigned_reviewers }}"
