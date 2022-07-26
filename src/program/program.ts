@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 
-import type {Config} from '../types'
+import type {AssignReviewersReturn, Config} from '../types'
 
 import getYamlConfigAsync from '../utils/getYamlConfigAsync'
 import parseConfig from '../utils/parseConfig'
@@ -76,19 +76,29 @@ export async function run(): Promise<void> {
         return
       }
 
-      core.setOutput('unassigned_status', unassignedResult.status)
-      core.setOutput('unassigned_message', unassignedResult.message)
-      core.setOutput('unassigned_url', unassignedResult.data?.url)
-
+      setResultOutput('unassigned', unassignedResult)
       core.debug(`${unassignedResult.status} - ${unassignedResult.message}`)
+    } else {
+      setResultOutput('unassigned', {
+        status: 'info',
+        message: 'Skip unassigning reviewers'
+      })
     }
 
-    core.setOutput('assigned_status', assignedResult.status)
-    core.setOutput('assigned_message', assignedResult.message)
-    core.setOutput('assigned_url', assignedResult.data?.url)
+    setResultOutput('assigned', assignedResult)
   } catch (error) {
     if (error instanceof Error) {
       core.setFailed(error.message)
     }
   }
+}
+
+function setResultOutput(
+  assignType: 'unassigned' | 'assigned',
+  result: AssignReviewersReturn
+): void {
+  core.setOutput(`${assignType}_status`, result.status)
+  core.setOutput(`${assignType}_message`, result.message)
+  core.setOutput(`${assignType}_url`, result.data?.url)
+  core.setOutput(`${assignType}_reviewers`, result.data?.reviewers)
 }

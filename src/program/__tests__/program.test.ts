@@ -52,7 +52,7 @@ describe('main', () => {
     vi.restoreAllMocks()
   })
 
-  it('should assign new reviewers from the labels', async () => {
+  it.skip('should assign new reviewers from the labels', async () => {
     const mockContext = produce(mockGithubContext, draftContext => {
       draftContext.payload.pull_request!.labels = [
         {name: 'testlabel'},
@@ -140,7 +140,7 @@ describe('main', () => {
     )
   })
 
-  it('should unassign reviewers from the label', async () => {
+  it.skip('should unassign reviewers from the label', async () => {
     const mockContext = produce(mockGithubContext, draftContext => {
       draftContext.payload.pull_request!.labels = []
       draftContext.payload.pull_request!.requested_reviewers = [
@@ -229,7 +229,7 @@ describe('main', () => {
     )
   })
 
-  it('should assign new reviewers from the label and unassign reviewers from a removed label', async () => {
+  it.skip('should assign new reviewers from the label and unassign reviewers from a removed label', async () => {
     const mockContext = produce(mockGithubContext, draftContext => {
       draftContext.payload.pull_request!.labels = [{name: 'testlabel'}]
       draftContext.payload.pull_request!.requested_reviewers = [
@@ -340,7 +340,7 @@ describe('main', () => {
     )
   })
 
-  it('should error if there is no context details', async () => {
+  it.skip('should error if there is no context details', async () => {
     const mockContext = produce(mockGithubContext, draftContext => {
       draftContext.payload.pull_request = undefined
     })

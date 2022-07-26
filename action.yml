@@ -18,15 +18,19 @@ inputs:
     required: false
 outputs:
   assigned_status:
-    description: 'Whether reviewers have been assigned or unassigned successfully'
+    description: 'Whether reviewers have been assigned successfully'
   assigned_message:
     description: 'Additional details of the status'
+  assigned_reviewers:
+    description: 'The reviewers that the action has assigned'
   assigned_url:
     description: 'The PR url'
   unassigned_status:
-    description: 'Whether reviewers have been assigned or unassigned successfully'
+    description: 'Whether reviewers have been unassigned successfully'
   unassigned_message:
     description: 'Additional details of the status'
+  unassigned_reviewers:
+    description: 'The reviewers that the action has unassigned'
   unassigned_url:
     description: 'The PR url'
 runs:
