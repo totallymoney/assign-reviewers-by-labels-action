@@ -2,8 +2,9 @@ import {describe, it, expect, afterEach, vi} from 'vitest'
 
 import {unassignReviewersAsync} from '../unassignReviewersAsync'
 import * as setReviewersAsyncFn from '../setReviewersAsync'
+import {Client} from '../../types'
 
-const mockClient = {} as any
+const mockClient = {} as unknown as Client
 
 describe('unassignReviewersAsync', () => {
   afterEach(() => {
@@ -13,17 +14,16 @@ describe('unassignReviewersAsync', () => {
   it('should unassign reviewers from labels that have been removed', async () => {
     const spy = vi
       .spyOn(setReviewersAsyncFn, 'setReviewersAsync')
-      .mockImplementationOnce(
-        () =>
-          Promise.resolve({
-            url: 'mock-url'
-          }) as any
+      .mockImplementationOnce(() =>
+        Promise.resolve({
+          url: 'mock-url'
+        })
       )
 
     const result = await unassignReviewersAsync({
       client: mockClient,
       contextDetails: {
-        labels: ['test'],
+        labels: [],
         reviewers: ['reviewer1', 'reviewer2', 'reviewer3', 'reviewer4']
       },
       labelReviewers: {
@@ -38,7 +38,7 @@ describe('unassignReviewersAsync', () => {
       message: 'Reviewers have been unassigned',
       data: {
         url: 'mock-url',
-        reviewers: ['reviewer3']
+        reviewers: ['reviewer1', 'reviewer2', 'reviewer3']
       }
     })
 

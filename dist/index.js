@@ -51,7 +51,7 @@ const getContextPullRequestDetails_1 = __importDefault(__nccwpck_require__(6342)
 const assignReviewersAsync_1 = __nccwpck_require__(9388);
 const unassignReviewersAsync_1 = __nccwpck_require__(5310);
 function run() {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b, _c, _d, _e, _f, _g, _h;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const client = github.getOctokit(core.getInput('repo-token', { required: true }));
@@ -82,13 +82,15 @@ function run() {
             core.debug(`${assignedResult.status} - ${assignedResult.message}`);
             if (unassignIfLabelRemoved) {
                 core.debug('Unassign reviewers');
-                core.debug(contextDetails.labels.join(','));
-                core.debug([
+                core.debug(`current reviewers ${contextDetails.reviewers.join(',')}`);
+                core.debug(`labels ${contextDetails.labels.join(',')}`);
+                core.debug(`assigned reviewers ${(_d = (_c = assignedResult.data) === null || _c === void 0 ? void 0 : _c.reviewers.join(',')) !== null && _d !== void 0 ? _d : ''}`);
+                core.debug(`projected assigned reviewers ${[
                     ...new Set([
                         ...contextDetails.reviewers,
-                        ...((_d = (_c = assignedResult.data) === null || _c === void 0 ? void 0 : _c.reviewers) !== null && _d !== void 0 ? _d : [])
+                        ...((_f = (_e = assignedResult.data) === null || _e === void 0 ? void 0 : _e.reviewers) !== null && _f !== void 0 ? _f : [])
                     ])
-                ].join(','));
+                ].join(',')}`);
                 const unassignedResult = yield (0, unassignReviewersAsync_1.unassignReviewersAsync)({
                     client,
                     contextDetails: {
@@ -96,7 +98,7 @@ function run() {
                         reviewers: [
                             ...new Set([
                                 ...contextDetails.reviewers,
-                                ...((_f = (_e = assignedResult.data) === null || _e === void 0 ? void 0 : _e.reviewers) !== null && _f !== void 0 ? _f : [])
+                                ...((_h = (_g = assignedResult.data) === null || _g === void 0 ? void 0 : _g.reviewers) !== null && _h !== void 0 ? _h : [])
                             ])
                         ]
                     },
