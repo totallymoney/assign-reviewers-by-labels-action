@@ -23,11 +23,14 @@ export async function assignReviewersAsync({
     }
   }
 
-  const reviewersByLabels = Object.keys(labelReviewers)
-    .filter(label => contextDetails.labels.includes(label))
-    .reduce<string[]>((reviewers, label) => {
-      return reviewers.concat(labelReviewers[label])
-    }, [])
+  const labels = Object.keys(labelReviewers)
+  const reviewersByLabels: string[] = []
+
+  for (const label of labels) {
+    if (contextDetails.labels.includes(label)) {
+      reviewersByLabels.push(...labelReviewers[label])
+    }
+  }
 
   const reviewersToAssign = [...new Set(reviewersByLabels)]
 

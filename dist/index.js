@@ -51,7 +51,7 @@ const getContextPullRequestDetails_1 = __importDefault(__nccwpck_require__(6342)
 const assignReviewersAsync_1 = __nccwpck_require__(9388);
 const unassignReviewersAsync_1 = __nccwpck_require__(5310);
 function run() {
-    var _a, _b, _c, _d, _e, _f, _g, _h;
+    var _a, _b, _c, _d;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const client = github.getOctokit(core.getInput('repo-token', { required: true }));
@@ -82,15 +82,6 @@ function run() {
             core.debug(`${assignedResult.status} - ${assignedResult.message}`);
             if (unassignIfLabelRemoved) {
                 core.debug('Unassign reviewers');
-                core.debug(`current reviewers ${contextDetails.reviewers.join(',')}`);
-                core.debug(`labels ${contextDetails.labels.join(',')}`);
-                core.debug(`assigned reviewers ${(_d = (_c = assignedResult.data) === null || _c === void 0 ? void 0 : _c.reviewers.join(',')) !== null && _d !== void 0 ? _d : ''}`);
-                core.debug(`projected assigned reviewers ${[
-                    ...new Set([
-                        ...contextDetails.reviewers,
-                        ...((_f = (_e = assignedResult.data) === null || _e === void 0 ? void 0 : _e.reviewers) !== null && _f !== void 0 ? _f : [])
-                    ])
-                ].join(',')}`);
                 const unassignedResult = yield (0, unassignReviewersAsync_1.unassignReviewersAsync)({
                     client,
                     contextDetails: {
@@ -98,7 +89,7 @@ function run() {
                         reviewers: [
                             ...new Set([
                                 ...contextDetails.reviewers,
-                                ...((_h = (_g = assignedResult.data) === null || _g === void 0 ? void 0 : _g.reviewers) !== null && _h !== void 0 ? _h : [])
+                                ...((_d = (_c = assignedResult.data) === null || _c === void 0 ? void 0 : _c.reviewers) !== null && _d !== void 0 ? _d : [])
                             ])
                         ]
                     },
@@ -164,11 +155,13 @@ function assignReviewersAsync({ client, labelReviewers, contextDetails, contextP
                 message: 'No action context'
             };
         }
-        const reviewersByLabels = Object.keys(labelReviewers)
-            .filter(label => contextDetails.labels.includes(label))
-            .reduce((reviewers, label) => {
-            return reviewers.concat(labelReviewers[label]);
-        }, []);
+        const labels = Object.keys(labelReviewers);
+        const reviewersByLabels = [];
+        for (const label of labels) {
+            if (contextDetails.labels.includes(label)) {
+                reviewersByLabels.push(...labelReviewers[label]);
+            }
+        }
         const reviewersToAssign = [...new Set(reviewersByLabels)];
         if (reviewersToAssign.length === 0) {
             return {
@@ -356,7 +349,15 @@ function parseConfig(config) {
     if (invalidLabels.length > 0) {
         throw new Error(`${invalidLabels.join(' + ')} must have an array of reviewers`);
     }
-    return config;
+    const parsedConfig = config;
+    parsedConfig.assign = parseAssign(Object.assign({}, parsedConfig.assign));
+    return parsedConfig;
+}
+function parseAssign(assign) {
+    return Object.keys(assign).reduce((parsed, label) => {
+        parsed[label] = [...new Set(assign[label])];
+        return parsed;
+    }, {});
 }
 exports.default = parseConfig;
 
@@ -446,25 +447,39 @@ function unassignReviewersAsync({ client, labelReviewers, contextDetails, contex
                 message: 'No action context'
             };
         }
-        const reviewersByLabelMiss = Object.keys(labelReviewers)
-            .filter(label => !contextDetails.labels.includes(label))
-            .reduce((reviewers, label) => {
-            return reviewers.concat(labelReviewers[label]);
-        }, []);
+        const labels = Object.keys(labelReviewers);
+        const reviewersByLabelMiss = [];
+        for (const label of labels) {
+            if (!contextDetails.labels.includes(label)) {
+                reviewersByLabelMiss.push(...labelReviewers[label]);
+            }
+        }
         if (reviewersByLabelMiss.length === 0) {
             return {
-                message: 'No reviewers to unassign',
-                status: 'info'
+                status: 'info',
+                message: 'No reviewers to unassign'
             };
         }
-        const reviewersDupeCount = reviewersByLabelMiss.reduce((all, reviewer) => {
-            all[reviewer] = (all[reviewer] || 0) + 1;
-            return all;
-        }, {});
-        const reviewersToUnassign = Object.keys(reviewersDupeCount).filter(reviewer => {
-            return (reviewersDupeCount[reviewer] === 1 &&
-                contextDetails.reviewers.includes(reviewer));
-        });
+        const reviewersDupeRecord = {};
+        for (const label of labels) {
+            const reviewers = labelReviewers[label];
+            for (const reviewer of reviewers) {
+                reviewersDupeRecord[reviewer] = (reviewersDupeRecord[reviewer] || 0) + 1;
+            }
+        }
+        const dupeRecordReviewers = Object.keys(reviewersDupeRecord);
+        const reviewersToUnassign = [];
+        if (contextDetails.labels.length === 0) {
+            reviewersToUnassign.push(...dupeRecordReviewers);
+        }
+        else {
+            for (const reviewer of dupeRecordReviewers) {
+                if (reviewersDupeRecord[reviewer] === 1 &&
+                    contextDetails.reviewers.includes(reviewer)) {
+                    reviewersToUnassign.push(reviewer);
+                }
+            }
+        }
         if (reviewersToUnassign.length === 0) {
             return {
                 status: 'info',

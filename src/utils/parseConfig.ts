@@ -25,7 +25,18 @@ function parseConfig(config: unknown): Config {
     )
   }
 
-  return config as Config
+  const parsedConfig = config as Config
+
+  parsedConfig.assign = parseAssign({...parsedConfig.assign})
+
+  return parsedConfig
+}
+
+function parseAssign(assign: Config['assign']): Config['assign'] {
+  return Object.keys(assign).reduce<Config['assign']>((parsed, label) => {
+    parsed[label] = [...new Set(assign[label])]
+    return parsed
+  }, {})
 }
 
 export default parseConfig

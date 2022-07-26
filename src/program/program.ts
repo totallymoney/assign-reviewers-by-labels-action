@@ -56,21 +56,6 @@ export async function run(): Promise<void> {
     if (unassignIfLabelRemoved) {
       core.debug('Unassign reviewers')
 
-      core.debug(`current reviewers ${contextDetails.reviewers.join(',')}`)
-      core.debug(`labels ${contextDetails.labels.join(',')}`)
-      core.debug(
-        `assigned reviewers ${assignedResult.data?.reviewers.join(',') ?? ''}`
-      )
-
-      core.debug(
-        `projected assigned reviewers ${[
-          ...new Set([
-            ...contextDetails.reviewers,
-            ...(assignedResult.data?.reviewers ?? [])
-          ])
-        ].join(',')}`
-      )
-
       const unassignedResult = await unassignReviewersAsync({
         client,
         contextDetails: {
