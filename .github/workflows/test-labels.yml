@@ -13,3 +13,11 @@ jobs:
       - uses: ./
         with:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
+      - name: assigned reviewers
+        if: steps.assign_reviewers.outputs.assigned_status == 'success'
+        run: |
+          echo "reviewers assigned: ${{ steps.reviewer.outputs.assigned_reviewers }}"
+      - name: unassigned reviewers
+        if: steps.assign_reviewers.outputs.unassigned_status == 'success'
+        run: |
+          echo "reviewers unassigned: ${{ steps.reviewer.outputs.unassigned_reviewers }}"
