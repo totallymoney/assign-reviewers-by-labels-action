@@ -36,7 +36,7 @@ jobs:
     steps:
       - name: main
         id: assign-reviewers
-        uses: ljbc1994/assign-reviewers-by-labels@v1
+        uses: ljbc1994/assign-reviewers-by-labels-action@v1
         with:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
 ```
@@ -58,7 +58,7 @@ jobs:
     steps:
       - name: main
         id: assign_reviewers
-        uses: ljbc1994/assign-reviewers-by-labels@v1
+        uses: ljbc1994/assign-reviewers-by-labels-action@v1
         with:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
       - name: assigned reviewers
