@@ -1,9 +1,10 @@
 import {describe, it, expect, afterEach, vi} from 'vitest'
+import type {Client} from '../../types'
 
 import {assignReviewersAsync} from '../assignReviewersAsync'
 import * as setReviewersAsyncFn from '../setReviewersAsync'
 
-const mockClient = {} as any
+const mockClient = {} as unknown as Client
 
 describe('assignReviewersAsync', () => {
   afterEach(() => {
@@ -13,11 +14,10 @@ describe('assignReviewersAsync', () => {
   it('should assign a list of reviewers from the label reviewers', async () => {
     const spy = vi
       .spyOn(setReviewersAsyncFn, 'setReviewersAsync')
-      .mockImplementationOnce(
-        () =>
-          Promise.resolve({
-            url: 'mock-url'
-          }) as any
+      .mockImplementationOnce(() =>
+        Promise.resolve({
+          url: 'mock-url'
+        })
       )
 
     const result = await assignReviewersAsync({
@@ -45,11 +45,10 @@ describe('assignReviewersAsync', () => {
   it('should return an error status if there are no context details', async () => {
     const spy = vi
       .spyOn(setReviewersAsyncFn, 'setReviewersAsync')
-      .mockImplementationOnce(
-        () =>
-          Promise.resolve({
-            url: 'mock-url'
-          }) as any
+      .mockImplementationOnce(() =>
+        Promise.resolve({
+          url: 'mock-url'
+        })
       )
 
     const result = await assignReviewersAsync({
@@ -73,11 +72,10 @@ describe('assignReviewersAsync', () => {
   it('should return an info status if there are no reviewers to assign from the labels', async () => {
     const spy = vi
       .spyOn(setReviewersAsyncFn, 'setReviewersAsync')
-      .mockImplementationOnce(
-        () =>
-          Promise.resolve({
-            url: 'mock-url'
-          }) as any
+      .mockImplementationOnce(() =>
+        Promise.resolve({
+          url: 'mock-url'
+        })
       )
 
     const result = await assignReviewersAsync({

@@ -11,7 +11,7 @@ describe('unassignReviewersAsync', () => {
     vi.restoreAllMocks()
   })
 
-  it('should unassign reviewer from the label that has been removed', async () => {
+  it('should unassign reviewer when there are no labels', async () => {
     const spy = vi
       .spyOn(setReviewersAsyncFn, 'setReviewersAsync')
       .mockImplementationOnce(() =>

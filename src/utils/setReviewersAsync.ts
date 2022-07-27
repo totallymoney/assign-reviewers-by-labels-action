@@ -3,12 +3,33 @@ import {WebhookPayload} from '@actions/github/lib/interfaces'
 import type {Client} from '../types'
 
 interface Options {
+  /**
+   * The client to perform actions on github.
+   */
   client: Client
+  /**
+   * List of reviewers to assign or unassign.
+   */
   reviewers: string[]
+  /**
+   * The webhook payload.
+   */
   contextPayload: WebhookPayload
+  /**
+   * Whether to assign or unassign the reviewers.
+   */
   action?: 'assign' | 'unassign'
 }
 
+/**
+ * Either assign or unassign reviewers
+ * for a PR.
+ *
+ * @param {Options} options
+ * @returns {Promise<{url: string} | null>}
+ * The url of the PR that has had assigned/unassigned
+ * reviews.
+ */
 export async function setReviewersAsync(
   options: Options
 ): Promise<{url: string} | null> {
