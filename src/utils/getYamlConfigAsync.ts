@@ -3,6 +3,15 @@ import * as github from '@actions/github'
 
 import type {Client} from '../types'
 
+/**
+ * Retrieve the file contents from a github repo.
+ *
+ * @param {Client} client - The github client.
+ * @param {string} ref - The name of the commit/branch/tag.
+ * @param {string} contentPath - The path to the file.
+ * @returns {Promise<string>}
+ * The contents of the file.
+ */
 async function getFileContents(
   client: Client,
   ref: string,
@@ -28,6 +37,15 @@ async function getFileContents(
   return Buffer.from(data.content, 'base64').toString()
 }
 
+/**
+ * Retrieve the yaml config from a path.
+ *
+ * @param {Client} client - The github client.
+ * @param {string} ref - The name of the commit/branch/tag.
+ * @param {string} contentPath - The path to the file.
+ * @returns {Promise<TConfig | void>}
+ * The contents of the yaml config
+ */
 async function getYamlConfigAsync<TConfig>(
   client: Client,
   ref: string,

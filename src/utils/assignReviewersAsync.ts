@@ -1,5 +1,6 @@
 import type {WebhookPayload} from '@actions/github/lib/interfaces'
-import type {AssignReviewersReturn, Client, Config} from '../types'
+import type {Config} from '../config'
+import type {AssignReviewersReturn, Client} from '../types'
 import type {ContextPullRequestDetails} from './getContextPullRequestDetails'
 import {setReviewersAsync} from './setReviewersAsync'
 
@@ -10,6 +11,16 @@ interface Options {
   contextPayload: WebhookPayload
 }
 
+/**
+ * Determine the reviewers that should be
+ * added depending on the state of the PR. Then,
+ * request to add those reviewers to the PR.
+ *
+ * @param {Options} options
+ * @returns {Promise<AssignReviewersReturn>}
+ * The status of whether the reviewers were assigned
+ * as well as data containing those reviewers.
+ */
 export async function assignReviewersAsync({
   client,
   labelReviewers,
@@ -23,11 +34,14 @@ export async function assignReviewersAsync({
     }
   }
 
-  const reviewersByLabels = Object.keys(labelReviewers)
-    .filter(label => contextDetails.labels.includes(label))
-    .reduce<string[]>((reviewers, label) => {
-      return reviewers.concat(labelReviewers[label])
-    }, [])
+  const labels = Object.keys(labelReviewers)
+  const reviewersByLabels: string[] = []
+
+  for (const label of labels) {
+    if (contextDetails.labels.includes(label)) {
+      reviewersByLabels.push(...labelReviewers[label])
+    }
+  }
 
   const reviewersToAssign = [...new Set(reviewersByLabels)]
 

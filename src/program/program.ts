@@ -1,14 +1,20 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 
-import type {AssignReviewersReturn, Config} from '../types'
+import type {AssignReviewersReturn} from '../types'
 
 import getYamlConfigAsync from '../utils/getYamlConfigAsync'
 import parseConfig from '../utils/parseConfig'
 import getContextPullRequestDetails from '../utils/getContextPullRequestDetails'
 import {assignReviewersAsync} from '../utils/assignReviewersAsync'
 import {unassignReviewersAsync} from '../utils/unassignReviewersAsync'
+import {Config} from '../config'
 
+/**
+ * Assign and/or unassign reviewers using labels.
+ *
+ * @returns {Promise<void>}
+ */
 export async function run(): Promise<void> {
   try {
     const client = github.getOctokit(
@@ -27,7 +33,7 @@ export async function run(): Promise<void> {
 
     const yamlConfig = await getYamlConfigAsync<Config>(
       client,
-      github.context.payload.pull_request?.base?.sha,
+      contextDetails.baseSha,
       configFilePath
     )
 
@@ -60,6 +66,7 @@ export async function run(): Promise<void> {
         client,
         contextDetails: {
           labels: contextDetails.labels,
+          baseSha: contextDetails.baseSha,
           reviewers: [
             ...new Set([
               ...contextDetails.reviewers,
