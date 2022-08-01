@@ -1,13 +1,17 @@
-name: 'build-test'
+name: 'Lint and test'
+
 on: # rebuild any PRs and main branch changes
-  pull_request:
   push:
     branches:
       - main
-      - 'releases/*'
+    paths-ignore:
+      - '**.md'
+  pull_request:
+    paths-ignore:
+      - '**.md'
 
 jobs:
-  build: # make sure build/ci work properly
+  test-ci: # make sure build/ci work properly
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -19,8 +23,3 @@ jobs:
           yarn install --frozen-lockfile
       - run: |
           yarn all
-  test: # make sure the action works on a clean machine without building
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./
