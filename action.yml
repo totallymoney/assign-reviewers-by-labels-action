@@ -1,4 +1,4 @@
-name: 'Assign reviewers by label'
+name: 'Assign reviewers by labels'
 description: 'Use labels to automatically assign reviewers to PRs'
 branding:
   icon: 'tag'  

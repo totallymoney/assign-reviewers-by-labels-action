@@ -1,8 +1,8 @@
 {
-  "name": "typescript-action",
-  "version": "0.0.0",
-  "private": true,
-  "description": "TypeScript template action",
+  "name": "assign-reviewers-by-labels-action",
+  "version": "1.0.0",
+  "private": false,
+  "description": "Automatically assign reviewers to a PR using labels",
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc",
@@ -15,14 +15,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/typescript-action.git"
+    "url": "git+https://github.com/ljbc1994/assign-reviewers-by-labels-action.git"
   },
   "keywords": [
+    "github",
+    "pr",
     "actions",
-    "node",
-    "setup"
+    "labels",
+    "reviewers"
   ],
-  "author": "",
+  "author": "ljbc1994",
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.6.0",
