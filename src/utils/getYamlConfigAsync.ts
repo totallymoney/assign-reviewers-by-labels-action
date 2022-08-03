@@ -46,11 +46,11 @@ async function getFileContents(
  * @returns {Promise<TConfig | void>}
  * The contents of the yaml config
  */
-async function getYamlConfigAsync<TConfig>(
+export async function getYamlConfigAsync<TConfig>(
   client: Client,
   ref: string,
   contentPath: string
-): Promise<TConfig | void> {
+): Promise<TConfig | null> {
   try {
     const contents = await getFileContents(client, ref, contentPath)
     return yaml.load(contents, {filename: contentPath}) as TConfig
@@ -62,7 +62,6 @@ async function getYamlConfigAsync<TConfig>(
         } ${contentPath}`
       )
     }
+    return null
   }
 }
-
-export default getYamlConfigAsync

@@ -70,25 +70,24 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
-const getYamlConfigAsync_1 = __importDefault(__nccwpck_require__(2313));
-const parseConfig_1 = __importDefault(__nccwpck_require__(7459));
-const getContextPullRequestDetails_1 = __importDefault(__nccwpck_require__(6342));
+const getYamlConfigAsync_1 = __nccwpck_require__(2313);
+const parseConfig_1 = __nccwpck_require__(7459);
+const getContextPullRequestDetails_1 = __nccwpck_require__(6342);
 const assignReviewersAsync_1 = __nccwpck_require__(9388);
 const unassignReviewersAsync_1 = __nccwpck_require__(5310);
+const getConfigFromUrlAsync_1 = __nccwpck_require__(2807);
+const isValidUrl_1 = __nccwpck_require__(9771);
 /**
  * Assign and/or unassign reviewers using labels.
  *
  * @returns {Promise<void>}
  */
 function run() {
-    var _a, _b;
+    var _a, _b, _c;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const client = github.getOctokit(core.getInput('repo-token', { required: true }));
@@ -96,16 +95,26 @@ function run() {
             const unassignIfLabelRemoved = core.getInput('unassign-if-label-removed', {
                 required: false
             });
-            const contextDetails = (0, getContextPullRequestDetails_1.default)();
+            const contextDetails = (0, getContextPullRequestDetails_1.getContextPullRequestDetails)();
             if (contextDetails == null) {
                 throw new Error('No context details');
             }
-            const yamlConfig = yield (0, getYamlConfigAsync_1.default)(client, contextDetails.baseSha, configFilePath);
-            if (yamlConfig == null) {
+            let userConfig;
+            if ((0, isValidUrl_1.isValidUrl)(configFilePath)) {
+                core.debug('🔗 Retrieving config from url...');
+                const configRequestHeaders = (_a = core.getInput('config-request-headers', { required: false })) !== null && _a !== void 0 ? _a : {};
+                userConfig = yield (0, getConfigFromUrlAsync_1.getConfigFromUrl)(configFilePath, contextDetails.baseSha, JSON.parse(configRequestHeaders));
+            }
+            else {
+                core.debug('📄 Retrieving config from yaml file...');
+                userConfig = yield (0, getYamlConfigAsync_1.getYamlConfigAsync)(client, contextDetails.baseSha, configFilePath);
+            }
+            if (userConfig == null) {
                 throw new Error('Failed to load config file');
             }
-            const config = (0, parseConfig_1.default)(yamlConfig);
+            const config = (0, parseConfig_1.parseConfig)(userConfig);
             const contextPayload = github.context.payload;
+            core.debug('Assigning reviewers...');
             const assignedResult = yield (0, assignReviewersAsync_1.assignReviewersAsync)({
                 client,
                 contextDetails,
@@ -118,7 +127,7 @@ function run() {
             }
             core.debug(`${assignedResult.status} - ${assignedResult.message}`);
             if (unassignIfLabelRemoved) {
-                core.debug('Unassign reviewers');
+                core.debug('Unassigning reviewers...');
                 const unassignedResult = yield (0, unassignReviewersAsync_1.unassignReviewersAsync)({
                     client,
                     contextDetails: {
@@ -127,7 +136,7 @@ function run() {
                         reviewers: [
                             ...new Set([
                                 ...contextDetails.reviewers,
-                                ...((_b = (_a = assignedResult.data) === null || _a === void 0 ? void 0 : _a.reviewers) !== null && _b !== void 0 ? _b : [])
+                                ...((_c = (_b = assignedResult.data) === null || _b === void 0 ? void 0 : _b.reviewers) !== null && _c !== void 0 ? _c : [])
                             ])
                         ]
                     },
@@ -248,6 +257,45 @@ exports.assignReviewersAsync = assignReviewersAsync;
 
 /***/ }),
 
+/***/ 2807:
+/***/ (function(__unused_webpack_module, exports) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getConfigFromUrl = void 0;
+function getConfigFromUrl(configUrl, ref, headers) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const response = yield fetch(configUrl, {
+                method: 'GET',
+                headers: Object.assign({ 'content-type': 'application/json' }, headers)
+            });
+            const json = yield response.json();
+            return json;
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                throw new Error(`Failed to load configuration ${ref.slice(0, 7)} ${error.message} ${configUrl}`);
+            }
+            return null;
+        }
+    });
+}
+exports.getConfigFromUrl = getConfigFromUrl;
+
+
+/***/ }),
+
 /***/ 6342:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -277,6 +325,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getContextPullRequestDetails = void 0;
 const github = __importStar(__nccwpck_require__(5438));
 /**
  * The pull request details from the context.
@@ -299,7 +348,7 @@ function getContextPullRequestDetails() {
         baseSha: (_a = pullRequest === null || pullRequest === void 0 ? void 0 : pullRequest.base) === null || _a === void 0 ? void 0 : _a.sha
     };
 }
-exports.default = getContextPullRequestDetails;
+exports.getContextPullRequestDetails = getContextPullRequestDetails;
 
 
 /***/ }),
@@ -345,6 +394,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getYamlConfigAsync = void 0;
 const js_yaml_1 = __importDefault(__nccwpck_require__(1917));
 const github = __importStar(__nccwpck_require__(5438));
 /**
@@ -393,10 +443,32 @@ function getYamlConfigAsync(client, ref, contentPath) {
             if (error instanceof Error) {
                 throw new Error(`Failed to load configuration ${ref.slice(0, 7)} ${error.message} ${contentPath}`);
             }
+            return null;
         }
     });
 }
-exports.default = getYamlConfigAsync;
+exports.getYamlConfigAsync = getYamlConfigAsync;
+
+
+/***/ }),
+
+/***/ 9771:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isValidUrl = void 0;
+function isValidUrl(url) {
+    try {
+        new URL(url);
+        return true;
+    }
+    catch (_a) {
+        return false;
+    }
+}
+exports.isValidUrl = isValidUrl;
 
 
 /***/ }),
@@ -407,6 +479,7 @@ exports.default = getYamlConfigAsync;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.parseConfig = void 0;
 const zod_1 = __nccwpck_require__(3301);
 const config_1 = __nccwpck_require__(6730);
 /**
@@ -435,6 +508,7 @@ function parseConfig(config) {
         throw new Error('Failed to parse the config');
     }
 }
+exports.parseConfig = parseConfig;
 /**
  * Scrub the list of reviewers for each label so its a unique list of
  * reviewers.
@@ -450,7 +524,6 @@ function dedupeLabelReviewers(assign) {
         return parsed;
     }, {});
 }
-exports.default = parseConfig;
 
 
 /***/ }),

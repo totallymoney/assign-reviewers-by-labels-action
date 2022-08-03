@@ -3,11 +3,14 @@ import * as github from '@actions/github'
 
 import type {AssignReviewersReturn} from '../types'
 
-import getYamlConfigAsync from '../utils/getYamlConfigAsync'
-import parseConfig from '../utils/parseConfig'
-import getContextPullRequestDetails from '../utils/getContextPullRequestDetails'
+import {getYamlConfigAsync} from '../utils/getYamlConfigAsync'
+import {parseConfig} from '../utils/parseConfig'
+import {getContextPullRequestDetails} from '../utils/getContextPullRequestDetails'
 import {assignReviewersAsync} from '../utils/assignReviewersAsync'
 import {unassignReviewersAsync} from '../utils/unassignReviewersAsync'
+import {getConfigFromUrl} from '../utils/getConfigFromUrlAsync'
+import {isValidUrl} from '../utils/isValidUrl'
+
 import {Config} from '../config'
 
 /**
@@ -31,19 +34,35 @@ export async function run(): Promise<void> {
       throw new Error('No context details')
     }
 
-    const yamlConfig = await getYamlConfigAsync<Config>(
-      client,
-      contextDetails.baseSha,
-      configFilePath
-    )
+    let userConfig: Config | null
 
-    if (yamlConfig == null) {
+    if (isValidUrl(configFilePath)) {
+      core.debug('🔗 Retrieving config from url...')
+      const configRequestHeaders =
+        core.getInput('config-request-headers', {required: false}) ?? {}
+      userConfig = await getConfigFromUrl<Config>(
+        configFilePath,
+        contextDetails.baseSha,
+        JSON.parse(configRequestHeaders)
+      )
+    } else {
+      core.debug('📄 Retrieving config from yaml file...')
+      userConfig = await getYamlConfigAsync<Config>(
+        client,
+        contextDetails.baseSha,
+        configFilePath
+      )
+    }
+
+    if (userConfig == null) {
       throw new Error('Failed to load config file')
     }
 
-    const config = parseConfig(yamlConfig)
+    const config = parseConfig(userConfig)
 
     const contextPayload = github.context.payload
+
+    core.debug('Assigning reviewers...')
 
     const assignedResult = await assignReviewersAsync({
       client,
@@ -60,7 +79,7 @@ export async function run(): Promise<void> {
     core.debug(`${assignedResult.status} - ${assignedResult.message}`)
 
     if (unassignIfLabelRemoved) {
-      core.debug('Unassign reviewers')
+      core.debug('Unassigning reviewers...')
 
       const unassignedResult = await unassignReviewersAsync({
         client,

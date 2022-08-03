@@ -15,7 +15,7 @@ export type ContextPullRequestDetails = {
  * The pull request details that the application
  * requires.
  */
-function getContextPullRequestDetails(): ContextPullRequestDetails | null {
+export function getContextPullRequestDetails(): ContextPullRequestDetails | null {
   const pullRequest = github.context.payload.pull_request
 
   if (typeof pullRequest === 'undefined') {
@@ -31,5 +31,3 @@ function getContextPullRequestDetails(): ContextPullRequestDetails | null {
     baseSha: pullRequest?.base?.sha
   }
 }
-
-export default getContextPullRequestDetails

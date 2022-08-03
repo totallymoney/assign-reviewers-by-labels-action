@@ -1,0 +1,27 @@
+name: 'test labels assign reviewers'	
+on:	
+  pull_request:	
+    types:	
+      - unlabeled	
+      - labeled	
+
+jobs:	
+  test-labels:	
+    runs-on: ubuntu-latest	
+    steps:	
+      - uses: actions/checkout@v2	
+      - uses: ./	
+        name: main	
+        id: reviewers	
+        with:	
+          repo-token: '${{ secrets.GITHUB_TOKEN }}'
+          config-file: 'https://sideways-oxidized-cub.glitch.me/'
+          config-request-headers: '{"Authorization": "Bearer ${{ secrets.API_TOKEN }}"}'
+      - name: unassigned reviewers	
+        run: |	
+          echo "reviewer assigned status: ${{ steps.reviewers.outputs.assigned_status }}"	
+          echo "reviewer assigned message: ${{ steps.reviewers.outputs.assigned_message }}"	
+          echo "reviewer assigned: ${{ steps.reviewers.outputs.assigned_reviewers }}"	
+          echo "reviewer unassigned status: ${{ steps.reviewers.outputs.unassigned_status }}"	
+          echo "reviewer unassigned message: ${{ steps.reviewers.outputs.unassigned_message }}"	
+          echo "reviewer unassigned: ${{ steps.reviewers.outputs.unassigned_reviewers }}"

@@ -10,7 +10,7 @@ import {Config, ConfigSchema} from '../config'
  * @returns {Config}
  * The parsed config file for the action.
  */
-function parseConfig(config: unknown): Config {
+export function parseConfig(config: unknown): Config {
   try {
     if (ConfigSchema.parse(config)) {
       const parsedConfig = config as Config
@@ -42,5 +42,3 @@ function dedupeLabelReviewers(assign: Config['assign']): Config['assign'] {
     return parsed
   }, {})
 }
-
-export default parseConfig
