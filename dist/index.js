@@ -102,7 +102,8 @@ function run() {
             let userConfig;
             if ((0, isValidUrl_1.isValidUrl)(configFilePath)) {
                 core.debug('🔗 Retrieving config from url...');
-                const configRequestHeaders = (_a = core.getInput('config-request-headers', { required: false })) !== null && _a !== void 0 ? _a : {};
+                const configRequestHeaders = (_a = core.getInput('config-request-headers', { required: false })) !== null && _a !== void 0 ? _a : '{}';
+                core.debug(`Using headers for url... ${JSON.parse(configRequestHeaders)}`);
                 userConfig = yield (0, getConfigFromUrlAsync_1.getConfigFromUrl)(configFilePath, contextDetails.baseSha, JSON.parse(configRequestHeaders));
             }
             else {

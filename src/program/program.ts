@@ -39,7 +39,10 @@ export async function run(): Promise<void> {
     if (isValidUrl(configFilePath)) {
       core.debug('🔗 Retrieving config from url...')
       const configRequestHeaders =
-        core.getInput('config-request-headers', {required: false}) ?? {}
+        core.getInput('config-request-headers', {required: false}) ?? '{}'
+
+      core.debug(`Using headers for url... ${JSON.parse(configRequestHeaders)}`)
+
       userConfig = await getConfigFromUrl<Config>(
         configFilePath,
         contextDetails.baseSha,
