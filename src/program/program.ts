@@ -8,7 +8,7 @@ import {parseConfig} from '../utils/parseConfig'
 import {getContextPullRequestDetails} from '../utils/getContextPullRequestDetails'
 import {assignReviewersAsync} from '../utils/assignReviewersAsync'
 import {unassignReviewersAsync} from '../utils/unassignReviewersAsync'
-import {getConfigFromUrl} from '../utils/getConfigFromUrlAsync'
+import {getConfigFromUrlAsync} from '../utils/getConfigFromUrlAsync'
 import {isValidUrl} from '../utils/isValidUrl'
 
 import {Config} from '../config'
@@ -45,7 +45,7 @@ export async function run(): Promise<void> {
         `Using headers for url... ${JSON.stringify(configRequestHeaders)}`
       )
 
-      userConfig = await getConfigFromUrl<Config>(
+      userConfig = await getConfigFromUrlAsync<Config>(
         configFilePath,
         contextDetails.baseSha,
         JSON.parse(configRequestHeaders)

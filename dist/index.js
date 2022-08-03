@@ -104,7 +104,7 @@ function run() {
                 core.debug('🔗 Retrieving config from url...');
                 const configRequestHeaders = (_a = core.getInput('config-request-headers', { required: false })) !== null && _a !== void 0 ? _a : '{}';
                 core.debug(`Using headers for url... ${JSON.stringify(configRequestHeaders)}`);
-                userConfig = yield (0, getConfigFromUrlAsync_1.getConfigFromUrl)(configFilePath, contextDetails.baseSha, JSON.parse(configRequestHeaders));
+                userConfig = yield (0, getConfigFromUrlAsync_1.getConfigFromUrlAsync)(configFilePath, contextDetails.baseSha, JSON.parse(configRequestHeaders));
             }
             else {
                 core.debug('📄 Retrieving config from yaml file...');
@@ -277,9 +277,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getConfigFromUrl = void 0;
+exports.getConfigFromUrlAsync = void 0;
 const isomorphic_fetch_1 = __importDefault(__nccwpck_require__(2340));
-function getConfigFromUrl(configUrl, ref, headers) {
+/**
+ * Retrieve the config from the url.
+ *
+ * @param {string} configUrl - The url to retrieve the config from.
+ * @param {string} ref - The name of the commit/branch/tag.
+ * @param {Record<string, string>} headers - The request headers to add to the request.
+ * @returns {Promise<TConfig | null>}
+ * The json config from the url
+ */
+function getConfigFromUrlAsync(configUrl, ref, headers) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const response = yield (0, isomorphic_fetch_1.default)(configUrl, {
@@ -297,7 +306,7 @@ function getConfigFromUrl(configUrl, ref, headers) {
         }
     });
 }
-exports.getConfigFromUrl = getConfigFromUrl;
+exports.getConfigFromUrlAsync = getConfigFromUrlAsync;
 
 
 /***/ }),
@@ -465,9 +474,16 @@ exports.getYamlConfigAsync = getYamlConfigAsync;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.isValidUrl = void 0;
-function isValidUrl(url) {
+/**
+ * Check whether the value is a valid url.
+ *
+ * @param {string} value - The potential url.
+ * @returns {boolean}
+ * Whether the value is a url and is valid
+ */
+function isValidUrl(value) {
     try {
-        new URL(url);
+        new URL(value);
         return true;
     }
     catch (_a) {

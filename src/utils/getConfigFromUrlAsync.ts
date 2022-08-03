@@ -1,6 +1,15 @@
 import fetch from 'isomorphic-fetch'
 
-export async function getConfigFromUrl<TConfig>(
+/**
+ * Retrieve the config from the url.
+ *
+ * @param {string} configUrl - The url to retrieve the config from.
+ * @param {string} ref - The name of the commit/branch/tag.
+ * @param {Record<string, string>} headers - The request headers to add to the request.
+ * @returns {Promise<TConfig | null>}
+ * The json config from the url
+ */
+export async function getConfigFromUrlAsync<TConfig>(
   configUrl: string,
   ref: string,
   headers?: Record<string, string>
