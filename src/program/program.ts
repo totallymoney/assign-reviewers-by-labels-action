@@ -58,6 +58,8 @@ export async function run(): Promise<void> {
       throw new Error('Failed to load config file')
     }
 
+    core.debug(`Using config - ${JSON.stringify(userConfig)}`)
+
     const config = parseConfig(userConfig)
 
     const contextPayload = github.context.payload

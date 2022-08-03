@@ -112,6 +112,7 @@ function run() {
             if (userConfig == null) {
                 throw new Error('Failed to load config file');
             }
+            core.debug(`Using config - ${JSON.stringify(userConfig)}`);
             const config = (0, parseConfig_1.parseConfig)(userConfig);
             const contextPayload = github.context.payload;
             core.debug('Assigning reviewers...');
