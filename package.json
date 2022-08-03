@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ljbc1994/assign-reviewers-by-labels-action.git"
+    "url": "git+https://github.com/totallymoney/assign-reviewers-by-labels-action.git"
   },
   "keywords": [
     "github",
@@ -24,7 +24,7 @@
     "labels",
     "reviewers"
   ],
-  "author": "ljbc1994",
+  "author": "totallymoney",
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.6.0",
