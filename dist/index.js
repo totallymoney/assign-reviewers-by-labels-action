@@ -258,7 +258,7 @@ exports.assignReviewersAsync = assignReviewersAsync;
 /***/ }),
 
 /***/ 2807:
-/***/ (function(__unused_webpack_module, exports) {
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
@@ -271,12 +271,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getConfigFromUrl = void 0;
+const isomorphic_fetch_1 = __importDefault(__nccwpck_require__(2340));
 function getConfigFromUrl(configUrl, ref, headers) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const response = yield fetch(configUrl, {
+            const response = yield (0, isomorphic_fetch_1.default)(configUrl, {
                 method: 'GET',
                 headers: Object.assign({ 'content-type': 'application/json' }, headers)
             });
@@ -5259,6 +5263,30 @@ function isPlainObject(o) {
 }
 
 exports.isPlainObject = isPlainObject;
+
+
+/***/ }),
+
+/***/ 2340:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var realFetch = __nccwpck_require__(467);
+module.exports = function(url, options) {
+	if (/^\/\//.test(url)) {
+		url = 'https:' + url;
+	}
+	return realFetch.call(this, url, options);
+};
+
+if (!global.fetch) {
+	global.fetch = module.exports;
+	global.Response = realFetch.Response;
+	global.Headers = realFetch.Headers;
+	global.Request = realFetch.Request;
+}
 
 
 /***/ }),
