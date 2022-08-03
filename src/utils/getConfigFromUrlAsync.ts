@@ -1,3 +1,5 @@
+import fetch from 'isomorphic-fetch'
+
 export async function getConfigFromUrl<TConfig>(
   configUrl: string,
   ref: string,
