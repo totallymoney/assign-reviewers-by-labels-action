@@ -71,15 +71,18 @@ jobs:
           echo "reviewers unassigned: ${{ steps.reviewer.outputs.unassigned_reviewers }}"
 ```
 
-#### Action inputs
+## Inputs ➡️ Outputs
+
+### Action inputs
 
 | Name | Description | Required | Default
 | - | - | - | - | 
 | `repo-token` | Token to use to authorize label changes. Typically the GITHUB_TOKEN secret, with `contents:read` and `pull-requests:write` access | `true` | N/A
 | `unassign-if-label-removed` | Whether to unassign reviewers that belong to a label if the label has been removed  | `true` | `true`
-| `config-file` | The path to the label configuration file | `false` | `.github/assign_label_reviewers.yml`
+| `config-file` | The path to the label configuration file or endpoint that returns JSON configuration file | `false` | `.github/assign_label_reviewers.yml`
+| `config-request-headers` | The headers to be passed when calling an endpoint to return the JSON configuration file | `false` | N/A
 
-#### Action outputs
+### Action outputs
 
 | Name | Description 
 | - | - |
@@ -91,3 +94,48 @@ jobs:
 | `unassigned_message` | Additional details of the status
 | `unassigned_url` | The url of the PR
 | `unassigned_reviewers` | The reviewers that have been unassigned
+
+## Examples
+
+### Using a remote config
+
+If you want to retrieve the config from an endpoint, we also support this.
+
+Please note:
+
+- We only allow retrieving the config using a `GET` request with the ability to pass through custom headers if you need to pass a api token (`config-request-headers`).
+- The endpoint **MUST** return the config in the `JSON` format.
+
+#### Example Config
+
+```json
+{
+  "assign": {
+    "login": ["ljbc1994", "reviewer2", "reviewer3"]
+  }
+}
+```
+
+#### Example Workflow
+
+```yml
+name: "Pull Request Label Reviewers"
+on:
+  pull_request:
+    types:
+      - unlabeled
+      - labeled
+
+jobs:
+  assign_and_unassign:
+    name: assign and unassign reviewers
+    runs-on: ubuntu-latest
+    steps:
+      - name: main
+        id: assign_reviewers
+        uses: totallymoney/assign-reviewers-by-labels-action@v1
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          config-file: 'https://www.totallymoney.com/assign-reviewers-label-config.json'
+          config-request-headers: '{"Authorization": "Bearer ${{ secrets.API_TOKEN }}"}'
+```
