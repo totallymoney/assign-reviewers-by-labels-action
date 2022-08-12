@@ -22,14 +22,15 @@ export async function getConfigFromUrlAsync<TConfig>(
         ...headers
       }
     })
-    const json: TConfig = await response.json()
-    return json
+    if (response.status >= 200 && response.status <= 299) {
+      const json: TConfig = await response.json()
+      return json
+    }
+    throw new Error(`Response status (${response.status}) from ${configUrl}`)
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(
-        `Failed to load configuration ${ref.slice(0, 7)} ${
-          error.message
-        } ${configUrl}`
+        `Failed to load configuration for sha "${ref}" - ${error.message}`
       )
     }
     return null

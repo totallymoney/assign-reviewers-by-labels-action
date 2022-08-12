@@ -15,6 +15,14 @@ vi.mock('@actions/core', () => {
   }
 })
 
+vi.mock('@actions/github', () => {
+  return {
+    context: vi.fn(),
+    getOctokit: vi.fn(),
+    getInput: vi.fn(),
+  }
+})
+
 interface MockGithubContext {
   payload: typeof github.context['payload']
   repo: typeof github.context['repo']
@@ -50,9 +58,12 @@ const mockGithubContext: MockGithubContext = {
 describe('main', () => {
   afterEach(() => {
     vi.restoreAllMocks()
+
+    // @ts-ignore
+    github.context = {}
   })
 
-  it.skip('should assign new reviewers from the labels', async () => {
+  it('should assign new reviewers from the labels', async () => {
     const mockContext = produce(mockGithubContext, draftContext => {
       draftContext.payload.pull_request!.labels = [
         {name: 'testlabel'},
@@ -82,9 +93,8 @@ describe('main', () => {
       }
     })
 
-    vi.spyOn(github, 'context', 'get').mockReturnValue(
-      mockContext as unknown as typeof github.context
-    )
+    // @ts-ignore
+    github.context = mockContext
 
     const requestReviewersMock = vi.fn().mockResolvedValue({
       url: 'test-url-request'
@@ -94,7 +104,8 @@ describe('main', () => {
       url: 'test-url-response'
     })
 
-    vi.spyOn(github, 'getOctokit').mockReturnValue({
+    // @ts-ignore
+    github.getOctokit.mockReturnValue({
       rest: {
         repos: {
           getContent: vi.fn().mockResolvedValue({
@@ -105,7 +116,7 @@ describe('main', () => {
           })
         },
         pulls: {
-          requestReviewers: requestReviewersMock
+          requestReviewers: requestReviewersMock,
         }
       }
     } as unknown as Client)
@@ -122,25 +133,29 @@ describe('main', () => {
 
     expect(removeRequestedReviewersMock).toHaveBeenCalledTimes(0)
 
-    expect(core.setOutput).toHaveBeenCalledTimes(3)
-    expect(core.setOutput).toHaveBeenNthCalledWith(
-      1,
-      'assigned_status',
-      'success'
-    )
-    expect(core.setOutput).toHaveBeenNthCalledWith(
-      2,
-      'assigned_message',
-      'Reviewers have been assigned'
-    )
-    expect(core.setOutput).toHaveBeenNthCalledWith(
-      3,
-      'assigned_url',
-      'test-url-request'
-    )
+    expect(core.setOutput).toHaveBeenCalledTimes(8)
+
+    const outputExpect = {
+      unassigned_status: 'info',
+      unassigned_message: 'Skip unassigning reviewers',
+      unassigned_url: undefined,
+      unassigned_reviewers: undefined,
+      assigned_status: 'success',
+      assigned_message: 'Reviewers have been assigned',
+      assigned_url: 'test-url-request',
+      assigned_reviewers: ['reviewer1', 'reviewer2', 'reviewer3', 'reviewer4']
+    }
+
+    Object.keys(outputExpect).forEach((key, index) => {
+      expect(core.setOutput).toHaveBeenNthCalledWith(
+        index + 1,
+        key,
+        outputExpect[key],
+      )
+    })
   })
 
-  it.skip('should unassign reviewers from the label', async () => {
+  it('should unassign reviewers from the label', async () => {
     const mockContext = produce(mockGithubContext, draftContext => {
       draftContext.payload.pull_request!.labels = []
       draftContext.payload.pull_request!.requested_reviewers = [
@@ -169,9 +184,8 @@ describe('main', () => {
       }
     })
 
-    vi.spyOn(github, 'context', 'get').mockReturnValue(
-      mockContext as unknown as typeof github.context
-    )
+    // @ts-ignore
+    github.context = mockContext
 
     const requestReviewersMock = vi.fn().mockResolvedValue({
       url: 'test-url-request'
@@ -210,26 +224,29 @@ describe('main', () => {
       reviewers: ['reviewer1', 'reviewer2']
     })
 
-    expect(core.setOutput).toHaveBeenCalledTimes(6)
+    expect(core.setOutput).toHaveBeenCalledTimes(8)
 
-    expect(core.setOutput).toHaveBeenNthCalledWith(
-      1,
-      'unassigned_status',
-      'success'
-    )
-    expect(core.setOutput).toHaveBeenNthCalledWith(
-      2,
-      'unassigned_message',
-      'Reviewers have been unassigned'
-    )
-    expect(core.setOutput).toHaveBeenNthCalledWith(
-      3,
-      'unassigned_url',
-      'test-url-request'
-    )
+    const outputExpect = {
+      unassigned_status: 'success',
+      unassigned_message: 'Reviewers have been unassigned',
+      unassigned_url: 'test-url-request',
+      unassigned_reviewers: ['reviewer1', 'reviewer2'],
+      assigned_status: 'info',
+      assigned_message: 'No reviewers to assign from the labels provided',
+      assigned_url: undefined,
+      assigned_reviewers: undefined
+    }
+
+    Object.keys(outputExpect).forEach((key, index) => {
+      expect(core.setOutput).toHaveBeenNthCalledWith(
+        index + 1,
+        key,
+        outputExpect[key],
+      )
+    })
   })
 
-  it.skip('should assign new reviewers from the label and unassign reviewers from a removed label', async () => {
+  it('should assign new reviewers from the label and unassign reviewers from a removed label', async () => {
     const mockContext = produce(mockGithubContext, draftContext => {
       draftContext.payload.pull_request!.labels = [{name: 'testlabel'}]
       draftContext.payload.pull_request!.requested_reviewers = [
@@ -260,9 +277,8 @@ describe('main', () => {
       }
     })
 
-    vi.spyOn(github, 'context', 'get').mockReturnValue(
-      mockContext as unknown as typeof github.context
-    )
+    // @ts-ignore
+    github.context = mockContext
 
     const requestReviewersMock = vi.fn().mockResolvedValue({
       url: 'test-url-request'
@@ -307,40 +323,29 @@ describe('main', () => {
       reviewers: ['reviewer3', 'reviewer4']
     })
 
-    expect(core.setOutput).toHaveBeenCalledTimes(6)
-    expect(core.setOutput).toHaveBeenNthCalledWith(
-      1,
-      'unassigned_status',
-      'success'
-    )
-    expect(core.setOutput).toHaveBeenNthCalledWith(
-      2,
-      'unassigned_message',
-      'Reviewers have been unassigned'
-    )
-    expect(core.setOutput).toHaveBeenNthCalledWith(
-      3,
-      'unassigned_url',
-      'test-url-request'
-    )
-    expect(core.setOutput).toHaveBeenNthCalledWith(
-      4,
-      'assigned_status',
-      'success'
-    )
-    expect(core.setOutput).toHaveBeenNthCalledWith(
-      5,
-      'assigned_message',
-      'Reviewers have been assigned'
-    )
-    expect(core.setOutput).toHaveBeenNthCalledWith(
-      6,
-      'assigned_url',
-      'test-url-request'
-    )
+    expect(core.setOutput).toHaveBeenCalledTimes(8)
+
+    const outputExpect = {
+      unassigned_status: 'success',
+      unassigned_message: 'Reviewers have been unassigned',
+      unassigned_url: 'test-url-request',
+      unassigned_reviewers: ['reviewer3', 'reviewer4'],
+      assigned_status: 'success',
+      assigned_message: 'Reviewers have been assigned',
+      assigned_url: 'test-url-request',
+      assigned_reviewers: ['reviewer1', 'reviewer2']
+    }
+
+    Object.keys(outputExpect).forEach((key, index) => {
+      expect(core.setOutput).toHaveBeenNthCalledWith(
+        index + 1,
+        key,
+        outputExpect[key],
+      )
+    })
   })
 
-  it.skip('should error if there is no context details', async () => {
+  it('should error if there is no context details', async () => {
     const mockContext = produce(mockGithubContext, draftContext => {
       draftContext.payload.pull_request = undefined
     })
@@ -360,9 +365,8 @@ describe('main', () => {
       }
     })
 
-    vi.spyOn(github, 'context', 'get').mockReturnValue(
-      mockContext as unknown as typeof github.context
-    )
+    // @ts-ignore
+    github.context = mockContext
 
     await run()
 

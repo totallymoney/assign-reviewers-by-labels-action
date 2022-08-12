@@ -103,7 +103,7 @@ If you want to retrieve the config from an endpoint, we also support this.
 
 Please note:
 
-- We only allow retrieving the config using a `GET` request with the ability to pass through custom headers if you need to pass a api token (`config-request-headers`).
+- We only allow retrieving the config using a `GET` request with the ability to pass through custom headers if you need to pass an api token (`config-request-headers`).
 - The endpoint **MUST** return the config in the `JSON` format.
 
 #### Example Config
