@@ -19,7 +19,7 @@ vi.mock('@actions/github', () => {
   return {
     context: vi.fn(),
     getOctokit: vi.fn(),
-    getInput: vi.fn(),
+    getInput: vi.fn()
   }
 })
 
@@ -116,7 +116,7 @@ describe('main', () => {
           })
         },
         pulls: {
-          requestReviewers: requestReviewersMock,
+          requestReviewers: requestReviewersMock
         }
       }
     } as unknown as Client)
@@ -150,7 +150,7 @@ describe('main', () => {
       expect(core.setOutput).toHaveBeenNthCalledWith(
         index + 1,
         key,
-        outputExpect[key],
+        outputExpect[key]
       )
     })
   })
@@ -241,7 +241,7 @@ describe('main', () => {
       expect(core.setOutput).toHaveBeenNthCalledWith(
         index + 1,
         key,
-        outputExpect[key],
+        outputExpect[key]
       )
     })
   })
@@ -340,7 +340,7 @@ describe('main', () => {
       expect(core.setOutput).toHaveBeenNthCalledWith(
         index + 1,
         key,
-        outputExpect[key],
+        outputExpect[key]
       )
     })
   })

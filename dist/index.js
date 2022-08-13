@@ -295,12 +295,15 @@ function getConfigFromUrlAsync(configUrl, ref, headers) {
                 method: 'GET',
                 headers: Object.assign({ 'content-type': 'application/json' }, headers)
             });
-            const json = yield response.json();
-            return json;
+            if (response.status >= 200 && response.status <= 299) {
+                const json = yield response.json();
+                return json;
+            }
+            throw new Error(`Response status (${response.status}) from ${configUrl}`);
         }
         catch (error) {
             if (error instanceof Error) {
-                throw new Error(`Failed to load configuration ${ref.slice(0, 7)} ${error.message} ${configUrl}`);
+                throw new Error(`Failed to load configuration for sha "${ref}" - ${error.message}`);
             }
             return null;
         }
@@ -653,10 +656,14 @@ function unassignReviewersAsync({ client, labelReviewers, contextDetails, contex
             };
         }
         const labels = Object.keys(labelReviewers);
+        const reviewersByLabelInclude = [];
         const reviewersByLabelMiss = [];
         for (const label of labels) {
             if (!contextDetails.labels.includes(label)) {
                 reviewersByLabelMiss.push(...labelReviewers[label]);
+            }
+            else {
+                reviewersByLabelInclude.push(...labelReviewers[label]);
             }
         }
         if (reviewersByLabelMiss.length === 0) {
@@ -665,25 +672,14 @@ function unassignReviewersAsync({ client, labelReviewers, contextDetails, contex
                 message: 'No reviewers to unassign'
             };
         }
-        const reviewersLabelsCount = {};
-        for (const label of labels) {
-            const reviewers = labelReviewers[label];
-            for (const reviewer of reviewers) {
-                reviewersLabelsCount[reviewer] = (reviewersLabelsCount[reviewer] || 0) + 1;
-            }
-        }
-        const dupeRecordReviewers = Object.keys(reviewersLabelsCount);
-        const reviewersToUnassign = [];
+        let reviewersToUnassign = [];
         if (contextDetails.labels.length === 0) {
-            reviewersToUnassign.push(...dupeRecordReviewers);
+            reviewersToUnassign = [
+                ...new Set([...reviewersByLabelMiss, ...reviewersByLabelInclude])
+            ];
         }
         else {
-            for (const reviewer of dupeRecordReviewers) {
-                if (reviewersLabelsCount[reviewer] === 1 &&
-                    contextDetails.reviewers.includes(reviewer)) {
-                    reviewersToUnassign.push(reviewer);
-                }
-            }
+            reviewersToUnassign = reviewersByLabelMiss.filter(reviewer => !reviewersByLabelInclude.includes(reviewer));
         }
         if (reviewersToUnassign.length === 0) {
             return {
