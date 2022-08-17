@@ -3,14 +3,17 @@ description: 'Use labels to automatically assign reviewers to PRs'
 branding:
   icon: 'tag'  
   color: 'blue'
-author: 'ljbc1994'
+author: 'totallymoney'
 inputs:
   repo-token:
     description: 'Token for the repository. Can be passed in using {{ secrets.GITHUB_TOKEN }}'
     required: true
   config-file:
-    description: 'Path to the assign reviewers by label YAML configuration file'
+    description: 'Path to the assign reviewers by label YAML configuration file or endpoint that returns JSON configuration file'
     default: .github/assign_label_reviewers.yml
+    required: false
+  config-request-headers:
+    description: 'The headers to be passed when calling an endpoint to return the JSON configuration file'
     required: false
   unassign-if-label-removed:
     description: 'Unassign reviewers when the reviewers label is removed'

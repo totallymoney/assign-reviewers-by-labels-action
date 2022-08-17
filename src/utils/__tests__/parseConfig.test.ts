@@ -1,6 +1,6 @@
 import {describe, it, expect} from 'vitest'
 import type {Config} from '../../config'
-import parseConfig from '../parseConfig'
+import {parseConfig} from '../parseConfig'
 
 describe('parseConfig', () => {
   it('should not throw an error if the config is valid', () => {

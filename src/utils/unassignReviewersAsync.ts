@@ -48,11 +48,15 @@ export async function unassignReviewersAsync({
   }
 
   const labels = Object.keys(labelReviewers)
+
+  const reviewersByLabelInclude: string[] = []
   const reviewersByLabelMiss: string[] = []
 
   for (const label of labels) {
     if (!contextDetails.labels.includes(label)) {
       reviewersByLabelMiss.push(...labelReviewers[label])
+    } else {
+      reviewersByLabelInclude.push(...labelReviewers[label])
     }
   }
 
@@ -63,29 +67,16 @@ export async function unassignReviewersAsync({
     }
   }
 
-  const reviewersLabelsCount: Record<string, number> = {}
-
-  for (const label of labels) {
-    const reviewers = labelReviewers[label]
-    for (const reviewer of reviewers) {
-      reviewersLabelsCount[reviewer] = (reviewersLabelsCount[reviewer] || 0) + 1
-    }
-  }
-
-  const dupeRecordReviewers = Object.keys(reviewersLabelsCount)
-  const reviewersToUnassign: string[] = []
+  let reviewersToUnassign: string[] = []
 
   if (contextDetails.labels.length === 0) {
-    reviewersToUnassign.push(...dupeRecordReviewers)
+    reviewersToUnassign = [
+      ...new Set([...reviewersByLabelMiss, ...reviewersByLabelInclude])
+    ]
   } else {
-    for (const reviewer of dupeRecordReviewers) {
-      if (
-        reviewersLabelsCount[reviewer] === 1 &&
-        contextDetails.reviewers.includes(reviewer)
-      ) {
-        reviewersToUnassign.push(reviewer)
-      }
-    }
+    reviewersToUnassign = reviewersByLabelMiss.filter(
+      reviewer => !reviewersByLabelInclude.includes(reviewer)
+    )
   }
 
   if (reviewersToUnassign.length === 0) {
