@@ -1,26 +1,29 @@
-name: 'build-test'
+name: Build and test
+
 on: # rebuild any PRs and main branch changes
-  pull_request:
   push:
     branches:
       - main
-      - 'releases/*'
+    paths-ignore:
+      - '**.md'
+  pull_request:
+    paths-ignore:
+      - '**.md'
 
 jobs:
-  build: # make sure build/ci work properly
+  build-and-test:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v3
+
       - uses: actions/setup-node@v3.4.1
           with:
             node-version: '14'
             cache: 'yarn'
+
       - run: |
           yarn install --frozen-lockfile
+
       - run: |
           yarn all
-  test: # make sure the action works on a clean machine without building
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./
